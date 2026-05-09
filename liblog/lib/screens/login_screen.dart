@@ -14,35 +14,40 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProviderStateMixin {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscure = true;
 
-  // Living gradient animation logic
-  static const _gradientSets = [
-    [AppColors.libPurple, AppColors.purple800],
-    [AppColors.purple700, AppColors.purple900],
-    [AppColors.purple600, AppColors.purple800],
-    [AppColors.libPurple, AppColors.purple700],
-  ];
-  int _gradientIndex = 0;
-  late Timer _gradientTimer;
+  late AnimationController _gradientController;
+  late Animation<Color?> _color1;
+  late Animation<Color?> _color2;
 
   @override
   void initState() {
     super.initState();
-    _gradientTimer = Timer.periodic(const Duration(seconds: 8), (_) {
-      if (mounted) {
-        setState(() => _gradientIndex = (_gradientIndex + 1) % _gradientSets.length);
-      }
-    });
+    _gradientController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat(reverse: true);
+
+    _color1 = TweenSequence<Color?>([
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.libPurple, end: AppColors.purple700)),
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.purple700, end: AppColors.purple600)),
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.purple600, end: AppColors.libPurple)),
+    ]).animate(_gradientController);
+
+    _color2 = TweenSequence<Color?>([
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.purple800, end: AppColors.purple900)),
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.purple900, end: AppColors.purple800)),
+      TweenSequenceItem(weight: 1.0, tween: ColorTween(begin: AppColors.purple800, end: AppColors.purple700)),
+    ]).animate(_gradientController);
   }
 
   @override
   void dispose() {
-    _gradientTimer.cancel();
+    _gradientController.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
@@ -69,7 +74,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
-    final colors = _gradientSets[_gradientIndex];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -83,17 +87,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    AnimatedContainer(
-                      duration: const Duration(seconds: 2),
-                      height: 380,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: colors,
-                        ),
-                      ),
+                    AnimatedBuilder(
+                      animation: _gradientController,
+                      builder: (context, child) {
+                        return Container(
+                          height: 380,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [_color1.value ?? AppColors.libPurple, _color2.value ?? AppColors.purple800],
+                            ),
+                          ),
+                          child: child,
+                        );
+                      },
                       child: Stack(
                         children: [
                           // Parallax Decorative Circles

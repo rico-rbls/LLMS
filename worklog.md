@@ -128,16 +128,18 @@ This document tracks the progressive implementation phases of the LibLog mobile 
 - **Time Date**: 2026-05-09
 - **Task ID**: UI-LOGIN-01
 - **Agent**: Antigravity (Gemini)
-- **Task**: Refactor the Login screen to match the prototype screenshot, implementing the overlapping card layout and living gradient header.
+- **Task**: Refactor the Login screen to match the prototype screenshot, implementing the overlapping card layout, living gradient header, and secure authentication utilities.
 - **Prompt(s)**:
-  - *"Analyze the uploaded login page screenshot, BRANDING.md, and FEATURES.md. Create a new Standard Operating Procedure (SOP) in directives/ui_login_implementation.md..."*
+  - *"Generate and execute a script to build the Flutter code and synchronize the repository... Create lib/screens/login_screen.dart... Implement the living gradient animation using an AnimationController... Implement the SHA-256 hashing utility in lib/utils/auth_utils.dart... Append a detailed entry to worklog.md..."*
 - **Work Log**: 
   - Directives: Created `directives/ui_login_implementation.md` mapping the prototype's high-impact header and form card structure.
   - UI Implementation: Completely refactored `login_screen.dart`.
-    - Implemented a 380px "living gradient" header with parallax decorative circles.
+    - Implemented a 380px "living gradient" header with parallax decorative circles using `AnimationController`, `TweenSequence`, and `AnimatedBuilder` for fluid state transitions.
     - Built the overlapping white form card with a 40px top radius and soft elevation.
     - Customized `TextFormField` decorations to include 12px rounding and `libPurple` focus states.
-    - Styled the "Use Demo Account" button with a branded border and icon.
+    - Styled the "Use Demo Account" button with a branded border and icon, auto-filling with `juan@university.edu`.
     - Constrained the entire layout to a 430px max-width container for platform consistency.
+  - Utilities: Created `lib/utils/auth_utils.dart` containing `hashPassword` and `verifyPassword` using SHA-256.
   - Typography: Swapped all text to `GoogleFonts.inter` with weights matching the design specs.
-- **Stage Summary**: The Login screen is now a high-fidelity match to the design prototype, featuring complex stack-based layout overlaps and animated brand elements.
+  - Rationale (Non-Persistent Session State): The auth session is deliberately non-persistent across app restarts. The `currentScreen` and `isAuthenticated` states are reset to false/login on launch to ensure a secure, kiosk-like experience suitable for a university library, preventing unauthorized access if a device is shared or left unattended.
+- **Stage Summary**: The Login screen is now a high-fidelity match to the design prototype, featuring complex stack-based layout overlaps, robust SHA-256 utilities, and animated brand elements.
