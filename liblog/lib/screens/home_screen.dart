@@ -191,6 +191,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.purple50,
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4)),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -257,6 +260,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4)),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,6 +304,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4)),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: primary.withOpacity(0.3), width: 1.5),
                   boxShadow: [
-                    BoxShadow(color: primary.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Column(
@@ -444,14 +453,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 16),
             SizedBox(
               height: 220,
-              child: ListView.separated(
+              child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 scrollDirection: Axis.horizontal,
                 itemCount: _recommended.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
                 itemBuilder: (_, i) {
                   final book = _recommended[i];
-                  return GestureDetector(
+                  return Padding(
+                    padding: EdgeInsets.only(right: i == _recommended.length - 1 ? 0 : 16),
+                    child: GestureDetector(
                     onTap: () {
                       ref.read(selectedResourceIdProvider.notifier).state = book['id'] as String;
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourceDetailScreen()));
@@ -524,7 +534,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-                  ).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: 400 + (i * 100)));
+                  )).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: 400 + (i * 100)));
                 },
               ),
             ),
