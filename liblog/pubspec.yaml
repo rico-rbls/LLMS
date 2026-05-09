@@ -1,0 +1,53 @@
+name: liblog
+description: LibLog — Digital Library Logbook Management System
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: "^2.5.1"
+  # HTTP client
+  dio: "^5.4.3"
+  # Local storage
+  shared_preferences: "^2.2.3"
+  flutter_secure_storage: "^9.0.0"
+  # Fonts
+  google_fonts: "^6.2.1"
+  # Images
+  cached_network_image: "^3.3.1"
+  # Animations
+  flutter_animate: "^4.5.0"
+  # Charts
+  fl_chart: "^0.68.0"
+  # Forms
+  flutter_form_builder: "^9.3.0"
+  form_builder_validators: "^10.0.1"
+  # QR / Camera
+  mobile_scanner: "^5.2.3"
+  # Share
+  share_plus: "^9.0.0"
+  # Confetti
+  confetti: "^0.7.0"
+  # Rating bar
+  flutter_rating_bar: "^4.0.1"
+  # Shimmer skeleton loading
+  shimmer: "^3.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: "^3.0.0"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/covers/
+
+  fonts: []
