@@ -143,3 +143,24 @@ This document tracks the progressive implementation phases of the LibLog mobile 
   - Typography: Swapped all text to `GoogleFonts.inter` with weights matching the design specs.
   - Rationale (Non-Persistent Session State): The auth session is deliberately non-persistent across app restarts. The `currentScreen` and `isAuthenticated` states are reset to false/login on launch to ensure a secure, kiosk-like experience suitable for a university library, preventing unauthorized access if a device is shared or left unattended.
 - **Stage Summary**: The Login screen is now a high-fidelity match to the design prototype, featuring complex stack-based layout overlaps, robust SHA-256 utilities, and animated brand elements.
+
+---
+
+### Phase 10: Onboarding 5-Step Wizard Implementation
+- **Time Date**: 2026-05-09
+- **Task ID**: UI-ONBOARD-01
+- **Agent**: Antigravity (Gemini)
+- **Task**: Implement the 5-step registration wizard matching prototype layouts and flow.
+- **Prompt(s)**:
+  - *"Task: Implement the onboarding_screen.dart featuring the 5-step registration wizard as shown in the uploaded prototype screenshots. Step 1: Directive Creation (Layer 1)..."*
+- **Work Log**: 
+  - Directives: Created `directives/ui_onboarding_implementation.md` outlining the exact 5-step sequence, validation rules, and progress bar specs.
+  - UI Implementation: Completely refactored `onboarding_screen.dart` to match the specific flow.
+    - **Step 1**: Role Selection (Student, Faculty, Visitor, Librarian) with active `libPurple` border highlights.
+    - **Step 2**: Personal Info (Full Name, University ID).
+    - **Step 3**: Academic Info (Program/Department, Year Level) with conditional rendering for Visitors.
+    - **Step 4**: Account Setup (Email, Password with visibility toggle).
+    - **Step 5**: Preferences (Toggle switches with custom styling and soft shadows).
+  - Navigation: Added a persistent bottom action bar with a "Back" ghost button and a "Continue" primary button. Implemented a shifting top progress bar using `AnimatedContainer`.
+  - Design Constraints: Standardized 12px `BorderRadius` across all inputs and cards, constrained max-width to 430px, and used `GoogleFonts.inter`.
+- **Stage Summary**: The Onboarding wizard is fully implemented and visually polished, offering a seamless 5-step registration flow that perfectly matches the provided UI specifications.
