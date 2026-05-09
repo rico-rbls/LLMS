@@ -150,17 +150,21 @@ This document tracks the progressive implementation phases of the LibLog mobile 
 - **Time Date**: 2026-05-09
 - **Task ID**: UI-ONBOARD-01
 - **Agent**: Antigravity (Gemini)
-- **Task**: Implement the 5-step registration wizard matching prototype layouts and flow.
+- **Task**: Implement `onboarding_screen.dart` using a `PageView` to manage the 5-step registration wizard with smooth transitions, confetti celebration, and modular state management.
 - **Prompt(s)**:
-  - *"Task: Implement the onboarding_screen.dart featuring the 5-step registration wizard as shown in the uploaded prototype screenshots. Step 1: Directive Creation (Layer 1)..."*
+  - *"Generate and execute a script to build the Flutter code... Create lib/screens/onboarding_screen.dart using a PageView or IndexedStack to manage the steps. Implement the navigation logic (Next and Back buttons) with smooth slide transitions (300ms). Use #652D90 for all primary actions..."*
 - **Work Log**: 
-  - Directives: Created `directives/ui_onboarding_implementation.md` outlining the exact 5-step sequence, validation rules, and progress bar specs.
-  - UI Implementation: Completely refactored `onboarding_screen.dart` to match the specific flow.
-    - **Step 1**: Role Selection (Student, Faculty, Visitor, Librarian) with active `libPurple` border highlights.
-    - **Step 2**: Personal Info (Full Name, University ID).
-    - **Step 3**: Academic Info (Program/Department, Year Level) with conditional rendering for Visitors.
-    - **Step 4**: Account Setup (Email, Password with visibility toggle).
-    - **Step 5**: Preferences (Toggle switches with custom styling and soft shadows).
-  - Navigation: Added a persistent bottom action bar with a "Back" ghost button and a "Continue" primary button. Implemented a shifting top progress bar using `AnimatedContainer`.
-  - Design Constraints: Standardized 12px `BorderRadius` across all inputs and cards, constrained max-width to 430px, and used `GoogleFonts.inter`.
-- **Stage Summary**: The Onboarding wizard is fully implemented and visually polished, offering a seamless 5-step registration flow that perfectly matches the provided UI specifications.
+  - **Directives**: Created `directives/ui_onboarding_implementation.md` outlining the exact 5-step sequence, validation rules, and progress bar specs.
+  - **Widget Architecture**: Used `PageView` (with `NeverScrollableScrollPhysics`) as the step container, driven by a `PageController`. This was chosen over `IndexedStack` because `PageView` provides built-in slide animation via `animateToPage()`, while `IndexedStack` would require a manual `AnimatedSwitcher` wrapper for the same effect.
+  - **Transitions**: Navigation calls `_pageCtrl.animateToPage(_step, duration: 300.ms, curve: Curves.easeInOut)` for a smooth slide effect matching the prototype.
+  - **Color Consistency**: Applied `AppColors.libPurple` (`#652D90`) to all interactive elements including:
+    - Active role selection card borders and backgrounds
+    - Focus borders on all `TextFormField` widgets (2px width)
+    - Primary "Continue" and "Complete Setup" `ElevatedButton`
+    - `Switch` active track color
+    - Progress bar segments for completed steps
+  - **ConfettiWidget Integration**: Instantiated a `ConfettiController(duration: 3s)` in `initState`. On final step completion (`_submit()`), `_confetti.play()` fires a 30-particle burst using `BlastDirectionality.explosive` with a branded color palette (`libPurple`, `purple300`, `chart2`, `chart4`).
+  - **Modular State Management Rationale**: Each of the 5 steps manages its own local `TextEditingController` instances instead of a single mega-form. This approach isolates validation per-step (`_canContinue()`), prevents premature validation errors from bleeding across steps, and allows draft persistence (`_persistDraft()`) to save intermediate data to the `StorageService` as the user advances — enabling users to resume a partially complete registration.
+  - **Progress Indicator**: 5 equally-spaced `AnimatedContainer` bars in the header, colored `libPurple` for completed steps and `AppColors.border` for upcoming ones, with a 300ms animated transition.
+  - **Bottom Navigation**: Persistent bottom bar with a ghost "Back" `TextButton` (visible only on steps 2–5) and a primary `ElevatedButton` for "Continue" / "Complete Setup 🎉". Button is disabled (opacity 30%) when current step validation fails.
+- **Stage Summary**: The Onboarding wizard is fully implemented and visually polished, offering a seamless `PageView`-driven 5-step registration flow. All primary actions use `#652D90`, transitions are 300ms, and confetti fires on the final step completion.
