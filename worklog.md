@@ -86,3 +86,21 @@ This document tracks the progressive implementation phases of the LibLog mobile 
   - Notifications: Implemented `notifications_screen.dart` with categorized tabs and `Dismissible` swipe-to-delete cards.
   - Navigation: Added `GestureDetector` links in `home_screen.dart` and `search_screen.dart` to route into the resource detail view.
 - **Stage Summary**: The application now supports deep linking and complex state mutations (e.g., reserving a book, leaving a review, clearing notifications). The UI architecture is completely connected.
+
+---
+
+### Phase 7: Home Dashboard Visual Polish & Layout Specification
+- **Time Date**: 2026-05-09
+- **Task ID**: TSK-006
+- **Agent**: Antigravity (Gemini)
+- **Task**: Translate the home screen design references into exact Flutter widgets and optimize layout structure.
+- **Prompt(s)**:
+  - *"Analyze the uploaded screenshots and BRANDING.md. Create a detailed SOP in directives/home_screen_layout.md that maps the visual hierarchy from the images to Flutter widgets..."*
+  - *"Generate the code for lib/screens/home_screen.dart and its sub-widgets. 1. Use Theme.of(context).primaryColor (#652D90) for all main accents..."*
+  - *"The Shadow System: The screenshots use a very soft elevation. In your code, remind the agent to use BoxShadow with Colors.black.withOpacity(0.05) and a high blur radius (20+)..."*
+- **Work Log**: 
+  - Directives: Created `directives/home_screen_layout.md` specifying exact widget hierarchies, spacing, and styling for the dashboard.
+  - UI Implementation: Completely refactored `home_screen.dart` to match the exact visual specs, utilizing `SingleChildScrollView`, `GoogleFonts.inter`, and custom semantic badges.
+  - Third-party Integration: Added and configured `smooth_page_indicator` for the announcements carousel and implemented `fl_chart` for the circular reading goal progress.
+  - Optimization: Fine-tuned elevation shadows across all cards using high blur radiuses and swapped horizontal book rows to use `ListView.builder` for better list rendering performance.
+- **Stage Summary**: The Home Dashboard is now highly polished, accurately reflecting the design specs with soft elevations, dynamic interactive carousels, and optimized horizontal scrolling.
