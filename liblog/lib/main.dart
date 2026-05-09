@@ -5,6 +5,7 @@ import 'providers/store_provider.dart';
 import 'providers/auth_provider.dart';
 import 'services/storage_service.dart';
 import 'screens/login_screen.dart';
+import 'screens/main_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +22,7 @@ class LibLogApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = ref.watch(themeModeProvider);
-    // Auth state — always starts false (non-persistent by design)
-    ref.watch(authProvider);
+    final isAuthenticated = ref.watch(authProvider).isAuthenticated;
 
     return MaterialApp(
       title: 'LibLog',
@@ -30,7 +30,9 @@ class LibLogApp extends ConsumerWidget {
       theme:     AppTheme.light,
       darkTheme:  AppTheme.dark,
       themeMode:  isDark ? ThemeMode.dark : ThemeMode.light,
-      home: const _MobileContainer(child: LoginScreen()),
+      home: _MobileContainer(
+        child: isAuthenticated ? const MainLayout() : const LoginScreen(),
+      ),
     );
   }
 }

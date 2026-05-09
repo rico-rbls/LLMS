@@ -14,6 +14,8 @@ dependencies:
   flutter_riverpod: "^2.5.1"
   # Cryptography — SHA-256 password hashing
   crypto: "^3.0.3"
+  # Skeleton/shimmer loading
+  shimmer: "^3.0.0"
   # HTTP client
   dio: "^5.4.3"
   # Local storage
@@ -38,8 +40,7 @@ dependencies:
   confetti: "^0.7.0"
   # Rating bar
   flutter_rating_bar: "^4.0.1"
-  # Shimmer skeleton loading
-  shimmer: "^3.0.0"
+
 
 dev_dependencies:
   flutter_test:
