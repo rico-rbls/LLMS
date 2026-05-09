@@ -12,6 +12,8 @@ dependencies:
 
   # State management
   flutter_riverpod: "^2.5.1"
+  # Cryptography — SHA-256 password hashing
+  crypto: "^3.0.3"
   # HTTP client
   dio: "^5.4.3"
   # Local storage
