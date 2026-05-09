@@ -44,13 +44,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _uniIdCtrl = TextEditingController();
 
   // Step 3: Academic Info
-  final _programCtrl = TextEditingController();
-  final _yearCtrl = TextEditingController();
+  String? _selectedProgram;
+  String? _selectedYear;
+  static const _programs = [
+    'BS Computer Science',
+    'BS Information Technology',
+    'BS Architecture',
+    'AB Communication',
+  ];
+  static const _years = [
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year',
+    '5th Year',
+  ];
 
   // Step 4: Account Setup
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
   bool _obscure = true;
+  bool _obscureConfirm = true;
 
   // Step 5: Preferences
   bool _notifDue = true;
@@ -78,8 +93,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _role = savedData['role'] ?? 'student';
       _fullNameCtrl.text = savedData['fullName'] ?? '';
       _uniIdCtrl.text = savedData['universityId'] ?? '';
-      _programCtrl.text = savedData['program'] ?? '';
-      _yearCtrl.text = savedData['yearLevel'] ?? '';
+      _selectedProgram = savedData['program'];
+      _selectedYear = savedData['yearLevel'];
       _emailCtrl.text = savedData['email'] ?? '';
       _step = savedStep;
       // We don't restore password for security
@@ -92,10 +107,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _pageCtrl.dispose();
     _fullNameCtrl.dispose();
     _uniIdCtrl.dispose();
-    _programCtrl.dispose();
-    _yearCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
     super.dispose();
   }
 
@@ -106,8 +120,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       'role': _role,
       'fullName': _fullNameCtrl.text,
       'universityId': _uniIdCtrl.text,
-      'program': _programCtrl.text,
-      'yearLevel': _yearCtrl.text,
+      'program': _selectedProgram ?? '',
+      'yearLevel': _selectedYear ?? '',
       'email': _emailCtrl.text,
     });
   }
@@ -120,9 +134,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _fullNameCtrl.text.trim().isNotEmpty && _uniIdCtrl.text.trim().isNotEmpty;
       case 2:
         if (_role == 'visitor') return true;
-        return _programCtrl.text.trim().isNotEmpty && _yearCtrl.text.trim().isNotEmpty;
+        return _selectedProgram != null && _selectedYear != null;
       case 3:
-        return _emailCtrl.text.contains('@') && _passwordCtrl.text.length >= 6;
+        return _emailCtrl.text.contains('@') &&
+               _passwordCtrl.text.length >= 6 &&
+               _passwordCtrl.text == _confirmPasswordCtrl.text;
       case 4:
         return true;
       default:
@@ -158,8 +174,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       'role': _role,
       'fullName': _fullNameCtrl.text.trim(),
       'universityId': _uniIdCtrl.text.trim(),
-      'program': _programCtrl.text.trim(),
-      'yearLevel': _yearCtrl.text.trim(),
+      'program': _selectedProgram ?? '',
+      'yearLevel': _selectedYear ?? '',
       'email': _emailCtrl.text.trim(),
       'password': AuthUtils.hashPassword(_passwordCtrl.text),
       'avatarInitials': getAvatarInitials(_fullNameCtrl.text.trim()),
@@ -244,9 +260,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               )
             : Column(
                 children: [
-                  _field('Program / Department', _programCtrl, Icons.account_balance_outlined, onChanged: (_) => setState(() {})),
+                  _dropdown('Program / Department', _selectedProgram, _programs, (val) => setState(() => _selectedProgram = val)),
                   const SizedBox(height: 16),
-                  _field('Year Level', _yearCtrl, Icons.timeline_outlined, onChanged: (_) => setState(() {})),
+                  _dropdown('Year Level', _selectedYear, _years, (val) => setState(() => _selectedYear = val)),
                 ],
               ),
       );
@@ -262,23 +278,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               controller: _passwordCtrl,
               obscureText: _obscure,
               style: GoogleFonts.inter(color: AppColors.foreground),
-              decoration: InputDecoration(
-                labelText: 'Password',
-                labelStyle: GoogleFonts.inter(color: AppColors.mutedForeground),
-                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.mutedForeground),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.mutedForeground),
-                  onPressed: () => setState(() => _obscure = !_obscure),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.libPurple, width: 2)),
-              ),
+              decoration: _passwordDecoration('Password', _obscure, () => setState(() => _obscure = !_obscure)),
               onChanged: (_) => setState(() {}),
             ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _confirmPasswordCtrl,
+              obscureText: _obscureConfirm,
+              style: GoogleFonts.inter(color: AppColors.foreground),
+              decoration: _passwordDecoration('Confirm Password', _obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm)),
+              onChanged: (_) => setState(() {}),
+            ),
+            if (_passwordCtrl.text.isNotEmpty && _confirmPasswordCtrl.text.isNotEmpty && _passwordCtrl.text != _confirmPasswordCtrl.text)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, left: 4),
+                child: Text('Passwords do not match', style: GoogleFonts.inter(color: Colors.red, fontSize: 12)),
+              ),
           ],
         ),
       );
@@ -316,6 +331,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.libPurple, width: 2)),
       ),
+    );
+  }
+
+  static Widget _dropdown(String label, String? value, List<String> items, void Function(String?) onChanged) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: GoogleFonts.inter()))).toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.inter(color: AppColors.mutedForeground),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.libPurple, width: 2)),
+      ),
+    );
+  }
+
+  static InputDecoration _passwordDecoration(String label, bool obscure, VoidCallback toggle) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.inter(color: AppColors.mutedForeground),
+      prefixIcon: const Icon(Icons.lock_outline, color: AppColors.mutedForeground),
+      suffixIcon: IconButton(
+        icon: Icon(obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.mutedForeground),
+        onPressed: toggle,
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.libPurple, width: 2)),
     );
   }
 
