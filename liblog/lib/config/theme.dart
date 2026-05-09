@@ -88,7 +88,7 @@ class AppTheme {
     textTheme: _buildTextTheme(AppColors.foreground, AppColors.mutedForeground),
 
     // Flat cards — elevation 0, no shadow
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       elevation: 0,
       color: AppColors.card,
       shape: RoundedRectangleBorder(
@@ -208,7 +208,7 @@ class AppTheme {
 
     textTheme: _buildTextTheme(Colors.white, AppColors.gray400),
 
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       elevation: 0,
       color: AppColors.darkCard,
       shape: RoundedRectangleBorder(
