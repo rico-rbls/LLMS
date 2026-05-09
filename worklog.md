@@ -107,17 +107,17 @@ This document tracks the progressive implementation phases of the LibLog mobile 
 
 ---
 
-### Phase 8: Search Screen UI Implementation
+### Phase 8: Search & Resource Detail Pixel-Perfect Implementation
 - **Time Date**: 2026-05-09
-- **Task ID**: TSK-007
+- **Task ID**: UI-CONTENT-01
 - **Agent**: Antigravity (Gemini)
-- **Task**: Implement the Search Screen UI with debounce logic, category filtering, and a text-based discovery state.
+- **Task**: Implement high-impact Search and Resource Detail screens matching prototype scroll behaviors and shadow systems.
 - **Prompt(s)**:
-  - *"Analyze the uploaded search screen screenshots, BRANDING.md, and FEATURES.md. Create a detailed SOP in directives/search_screen_ui.md..."*
-  - *"Generate and run an execution script to: Create lib/screens/search_screen.dart and lib/widgets/search_result_card.dart. Use the primary purple (#652D90) for selected pills..."*
+  - *"Read BRANDING.md, FEATURES.md, and analyze the uploaded prototype screenshots for the Search and Book Detail screens. Create a new SOP in directives/ui_content_implementation.md..."*
+  - *"Generate and execute a script to build the Flutter code... Update lib/screens/search_screen.dart... Create lib/widgets/search_result_card.dart... Update lib/screens/resource_detail_screen.dart using Sliver widgets..."*
 - **Work Log**: 
-  - Directives: Created `directives/search_screen_ui.md` detailing the header layout, `shimmer` states, and 300ms debounce input logic.
-  - UI Implementation: Built `search_screen.dart` featuring a horizontal category pill list using `AppColors.libPurple` for active selections, and implemented a text-based "Popular Searches" empty state discovery view.
-  - Components: Extracted `SearchResultCard` into its own widget file to ensure code modularity, applying soft `BoxShadow` elevations.
-  - Interactions: Integrated the `Timer` based 300ms debounce directly into the search input's `onChanged` event to smoothly transition between the shimmer loading state and actual results.
-- **Stage Summary**: The Search Screen is now fully operational with debounced input handling, category-based list filtering, and a clean, placeholder-free visual layout.
+  - Directives: Established `directives/ui_content_implementation.md` defining the "Soft Elevation" shadow system and sliver-based scroll requirements.
+  - Search: Updated `search_screen.dart` with a sticky header, category filtering, and 300ms debounce. Created `search_result_card.dart` with high-blur soft shadows.
+  - Details: Rebuilt `resource_detail_screen.dart` using `SliverAppBar` with a collapsing `FlexibleSpaceBar` cover effect. Implemented a 3-column metadata grid and a sticky bottom action bar with dynamic "Borrow/Reserve" logic.
+  - Refinement: Eliminated mascot assets as per strict user constraint, ensuring a clean academic aesthetic.
+- **Stage Summary**: Search and Detail flows are now pixel-perfect. The detail screen features high-fidelity sliver animations, and search performance is optimized with debouncing and reusable components.
