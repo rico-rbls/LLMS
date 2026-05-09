@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'config/theme.dart';
+import 'providers/store_provider.dart';
+import 'services/storage_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialise liblog-store (SharedPreferences) before providers start.
+  await StorageService.init();
+
   runApp(const ProviderScope(child: LibLogApp()));
 }
 
@@ -10,20 +18,24 @@ class LibLogApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'LibLog',
       debugShowCheckedModeBanner: false,
-      // TODO: wire ThemeData from config/theme.dart
+      theme:     AppTheme.light,
+      darkTheme:  AppTheme.dark,
+      themeMode:  isDark ? ThemeMode.dark : ThemeMode.light,
       home: const _MobileContainer(
         child: Scaffold(
-          body: Center(child: Text('LibLog — scaffold complete')),
+          body: Center(child: Text('LibLog — design system ready')),
         ),
       ),
     );
   }
 }
 
-/// Enforces a max-width 430px mobile viewport (from OVERVIEW.md §10).
+/// Enforces the 430px max-width mobile viewport from OVERVIEW.md §10.
 class _MobileContainer extends StatelessWidget {
   final Widget child;
   const _MobileContainer({required this.child});

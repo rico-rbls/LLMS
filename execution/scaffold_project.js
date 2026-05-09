@@ -253,8 +253,8 @@ dependencies:
   # Charts
   fl_chart: "^0.68.0"
   # Forms
-  flutter_form_builder: "^9.3.0"
-  form_builder_validators: "^10.0.1"
+  flutter_form_builder: "^10.3.0"
+  form_builder_validators: "^11.3.0"
   # QR / Camera
   mobile_scanner: "^5.2.3"
   # Share

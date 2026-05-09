@@ -213,3 +213,5 @@ model Review {
 - **Flutter Version Mismatch**: If Flutter 3.44 is unavailable, halt the execution script and inform the user.
 - **SQLite Database Lock**: If `prisma migrate` fails due to a locked file, clear the Prisma lock or stop running backend instances before retrying.
 - **Dependency Conflicts**: If pubspec dependencies fail to resolve, ensure compatible versions for Dart 3.x are specified.
+- **`intl` pin conflict** ⚠️: The Flutter SDK pins `intl` to `0.20.2` via `flutter_localizations`. `form_builder_validators ^10.x` requires `intl ^0.19.0` and will cause a version-solving failure. **Always use `form_builder_validators: "^11.3.0"` and `flutter_form_builder: "^10.3.0"`** — these are confirmed compatible with intl 0.20.2 (verified 2026-05-09).
+
