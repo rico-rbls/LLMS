@@ -1,10 +1,9 @@
 /// lib/screens/search_screen.dart
-/// Catalog browser: 300ms debounced search, category pills, shimmer skeletons, recently viewed.
+/// Catalog browser: 300ms debounced search, category pills, shimmer skeletons.
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../config/colors.dart';
 import '../providers/resource_provider.dart';
 import '../widgets/search_result_card.dart';
@@ -34,18 +33,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     'all': 'All', 'book': 'Books',
     'research': 'Research', 'magazine': 'Magazines',
   };
-  
-  static const _categoryIcons = {
-    'all': Icons.search_rounded,
-    'book': Icons.menu_book_rounded,
-    'research': Icons.article_rounded,
-    'magazine': Icons.auto_stories_rounded,
-  };
-
-  static const _popularTags = [
-    'Algorithms', 'Deep Learning', 'Database',
-    'Nursing', 'Psychology', 'Clean Code',
-  ];
 
   @override
   void dispose() {
@@ -56,12 +43,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    ref.read(_isSearchingProvider.notifier).state = true;
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      ref.read(_searchQueryProvider.notifier).state = value;
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    
+    // Always trigger shimmer if we're typing, unless clearing
+    if (value.isNotEmpty) {
+      ref.read(_isSearchingProvider.notifier).state = true;
+    } else {
       ref.read(_isSearchingProvider.notifier).state = false;
+    }
+    
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        ref.read(_searchQueryProvider.notifier).state = value;
+        ref.read(_isSearchingProvider.notifier).state = false;
+      }
     });
   }
 
@@ -78,81 +73,68 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final query       = ref.watch(_searchQueryProvider);
-    final category    = ref.watch(_searchCategoryProvider);
+    final query      = ref.watch(_searchQueryProvider);
+    final category   = ref.watch(_searchCategoryProvider);
     final isSearching = ref.watch(_isSearchingProvider);
+    final primary    = Theme.of(context).primaryColor; // #652D90
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2FA), // Light theme background
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Header ──────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Search Catalog', style: TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.w700)),
+                  const Text(
+                    'Search Library',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Search books, research & more',
+                    style: TextStyle(color: AppColors.mutedForeground, fontSize: 14),
+                  ),
                   const SizedBox(height: 16),
 
                   // Search input
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      focusNode: _focusNode,
-                      onChanged: _onSearchChanged,
-                      decoration: InputDecoration(
-                        hintText: 'Search books, research, magazines...',
-                        hintStyle: const TextStyle(color: AppColors.mutedForeground, fontSize: 14),
-                        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.mutedForeground),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                        suffixIcon: query.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, color: AppColors.mutedForeground),
-                              onPressed: _clearSearch,
-                            )
-                          : null,
+                  TextField(
+                    controller: _searchCtrl,
+                    focusNode: _focusNode,
+                    onChanged: _onSearchChanged,
+                    decoration: InputDecoration(
+                      hintText: 'Search by title, author, subject...',
+                      hintStyle: const TextStyle(color: AppColors.mutedForeground),
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.mutedForeground),
+                      suffixIcon: _searchCtrl.text.isNotEmpty || query.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, color: AppColors.mutedForeground),
+                            onPressed: _clearSearch,
+                          )
+                        : null,
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(9999),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(9999),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(9999),
+                        borderSide: BorderSide(color: primary.withOpacity(0.5), width: 1.5),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // Popular Tags
-                  Row(
-                    children: [
-                      const Icon(Icons.trending_up_rounded, size: 16, color: AppColors.mutedForeground),
-                      const SizedBox(width: 6),
-                      const Text('POPULAR', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.mutedForeground)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8, runSpacing: 8,
-                    children: _popularTags.map((tag) => GestureDetector(
-                      onTap: () => _applyTag(tag),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.purple50,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(tag, style: const TextStyle(
-                            fontSize: 12, color: AppColors.libPurple, fontWeight: FontWeight.w600)),
-                      ),
-                    )).toList(),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Horizontal Category Pills
+                  // Category pills
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -166,24 +148,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                color: selected ? AppColors.libPurple : Colors.white,
+                                color: selected ? primary : AppColors.purple50,
                                 borderRadius: BorderRadius.circular(9999),
-                                border: Border.all(color: selected ? AppColors.libPurple : AppColors.border),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(_categoryIcons[cat], size: 14, color: selected ? Colors.white : AppColors.mutedForeground),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _categoryLabels[cat]!,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: selected ? Colors.white : AppColors.mutedForeground,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                _categoryLabels[cat]!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: selected ? Colors.white : primary,
+                                ),
                               ),
                             ),
                           ),
@@ -191,7 +165,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       }).toList(),
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -201,7 +174,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               child: isSearching
                 ? _SkeletonList()
                 : query.isEmpty
-                  ? const _RecentlyViewedSection()
+                  ? _EmptySearchBody(onTagTap: _applyTag)
                   : _ResultsList(query: query, category: category),
             ),
           ],
@@ -211,75 +184,62 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 }
 
-// ── Recently Viewed (Empty State Carousel) ───────────────────────────────────
+// ── Popular tags + recently viewed (empty state) ──────────────────────────────
 
-class _RecentlyViewedSection extends StatelessWidget {
-  const _RecentlyViewedSection();
+class _EmptySearchBody extends StatelessWidget {
+  final ValueChanged<String> onTagTap;
+  const _EmptySearchBody({required this.onTagTap});
 
-  static const _recent = [
-    {'title': 'Scientific American April 2026', 'author': 'Springer Nature', 'type': 'magazine'},
-    {'title': 'Time Magazine Spring 2026', 'author': 'Time USA, LLC', 'type': 'magazine'},
-    {'title': 'National Geographic March 2026', 'author': 'National Geographic Society', 'type': 'magazine'},
+  static const _tags = [
+    'Algorithms', 'Deep Learning', 'Database',
+    'Nursing', 'Psychology', 'Clean Code',
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Icon(Icons.access_time_rounded, size: 18, color: AppColors.mutedForeground),
-              SizedBox(width: 8),
-              Text('Recently Viewed', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            ],
-          ),
+        const Text('Popular Searches', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8, runSpacing: 8,
+          children: _tags.map((tag) => GestureDetector(
+            onTap: () => onTagTap(tag),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.purple50,
+                borderRadius: BorderRadius.circular(9999),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min, 
+                children: [
+                  const Icon(Icons.trending_up_rounded, size: 14, color: AppColors.libPurple),
+                  const SizedBox(width: 4),
+                  Text(tag, style: const TextStyle(fontSize: 13, color: AppColors.libPurple, fontWeight: FontWeight.w500)),
+                ]
+              ),
+            ),
+          )).toList(),
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            scrollDirection: Axis.horizontal,
-            itemCount: _recent.length,
-            itemBuilder: (context, i) {
-              final item = _recent[i];
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: SizedBox(
-                  width: 140,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(Icons.menu_book_rounded, color: AppColors.libPurple.withOpacity(0.3), size: 40),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(item['title']!, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, height: 1.2)),
-                      const SizedBox(height: 4),
-                      Text(item['author']!, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 11, color: AppColors.mutedForeground)),
-                    ],
-                  ),
-                ),
-              );
-            },
+        const SizedBox(height: 32),
+        const Text('Browse by Category', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        ...['Books', 'Research Papers', 'Magazines'].map((cat) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.purple50,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.menu_book_rounded, color: AppColors.libPurple, size: 20),
           ),
-        ),
+          title: Text(cat, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.mutedForeground),
+        )),
       ],
     );
   }
@@ -291,28 +251,72 @@ class _SkeletonList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-      itemCount: 4,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      itemCount: 5,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, i) => Shimmer.fromColors(
         baseColor: Colors.grey.shade200,
         highlightColor: Colors.grey.shade50,
-        child: Container(
-          height: 100,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
-        ),
+        child: const _SkeletonCard(),
       ),
     );
   }
 }
 
-// ── Real results list ────────────────────────────────────────────────────────
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 96,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          // Cover placeholder
+          Container(
+            width: 72, height: 96,
+            decoration: BoxDecoration(
+              color: Colors.white, // Shimmer base color is grey
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          // Text placeholders
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 14, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(height: 8),
+                Container(height: 12, width: 160, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(height: 8),
+                Container(height: 10, width: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Real results list (stubbed — will connect to API) ────────────────────────
 
 class _ResultsList extends StatelessWidget {
   final String query;
   final String category;
   const _ResultsList({required this.query, required this.category});
 
+  // Stub data — replace with real API call via resourcesProvider
   static const _stub = [
     {'id': '1', 'title': 'Introduction to Algorithms', 'author': 'Cormen et al.', 'category': 'book', 'available': true},
     {'id': '1', 'title': 'Clean Code', 'author': 'Robert C. Martin', 'category': 'book', 'available': true},
@@ -321,9 +325,7 @@ class _ResultsList extends StatelessWidget {
     {'id': '1', 'title': 'Database System Concepts', 'author': 'Silberschatz et al.', 'category': 'book', 'available': true},
     {'id': '1', 'title': 'ML: A Probabilistic Perspective', 'author': 'Kevin Murphy', 'category': 'research', 'available': true},
     {'id': '2', 'title': 'NeurIPS 2025 Proceedings', 'author': 'Various', 'category': 'research', 'available': false},
-    {'id': '1', 'title': 'Scientific American April 2026', 'author': 'Springer Nature', 'category': 'magazine', 'available': true},
-    {'id': '1', 'title': 'Time Magazine Spring 2026', 'author': 'Time USA, LLC', 'category': 'magazine', 'available': true},
-    {'id': '1', 'title': 'National Geographic March 2026', 'author': 'National Geographic Society', 'category': 'magazine', 'available': true},
+    {'id': '1', 'title': 'National Geographic Mar 2026', 'author': 'Nat Geo Society', 'category': 'magazine', 'available': true},
   ];
 
   @override
@@ -338,34 +340,46 @@ class _ResultsList extends StatelessWidget {
 
     if (filtered.isEmpty) {
       return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          // Kuwago Mascot Placeholder / Fallback
-          Image.asset('assets/images/mascot_searching.png', height: 120,
-            errorBuilder: (_, __, ___) => const Icon(Icons.search_off_rounded, size: 80, color: AppColors.mutedForeground),
-          ),
-          const SizedBox(height: 24),
-          const Text('No results found', style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          const Text('Try adjusting your filters or search term.',
-            style: TextStyle(color: AppColors.mutedForeground)),
-        ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, 
+          children: [
+            const Icon(Icons.search_off_rounded, size: 64, color: AppColors.mutedForeground),
+            const SizedBox(height: 16),
+            const Text('No results found', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text('Try a different search term or category.', style: TextStyle(color: Colors.grey[500], fontSize: 14)),
+          ]
+        ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      itemCount: filtered.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) => Consumer(
-        builder: (context, ref, _) => GestureDetector(
-          onTap: () {
-            ref.read(selectedResourceIdProvider.notifier).state = filtered[i]['id'] as String;
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourceDetailScreen()));
-          },
-          child: SearchResultCard(resource: filtered[i]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          child: Text(
+            '${filtered.length} results for "$query"',
+            style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground, fontWeight: FontWeight.w500)
+          ),
         ),
-      ),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            itemCount: filtered.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (_, i) => Consumer(
+              builder: (context, ref, _) => GestureDetector(
+                onTap: () {
+                  ref.read(selectedResourceIdProvider.notifier).state = filtered[i]['id'] as String;
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourceDetailScreen()));
+                },
+                child: SearchResultCard(resource: filtered[i]),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
