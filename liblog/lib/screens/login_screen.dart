@@ -80,29 +80,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 430),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // ── Header Section ────────────────────────────────────────
-                Stack(
-                  clipBehavior: Clip.none,
+          child: Stack(
+            children: [
+              // ── Background Gradient ──────────────────────────────────────
+              AnimatedBuilder(
+                animation: _gradientController,
+                builder: (context, child) {
+                  return Container(
+                    height: 400,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [_color1.value ?? AppColors.libPurple, _color2.value ?? AppColors.purple800],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // ── Scrollable Content ───────────────────────────────────────
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
                   children: [
-                    AnimatedBuilder(
-                      animation: _gradientController,
-                      builder: (context, child) {
-                        return Container(
-                          height: 380,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [_color1.value ?? AppColors.libPurple, _color2.value ?? AppColors.purple800],
-                            ),
-                          ),
-                          child: child,
-                        );
-                      },
+                    // Header Content (Logo, Title, Subtitle)
+                    SizedBox(
+                      height: 360,
                       child: Stack(
                         children: [
                           // Parallax Decorative Circles
@@ -114,19 +119,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
                             ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: 20, duration: 8.seconds),
                           ),
                           Positioned(
-                            bottom: 20, left: -60,
+                            bottom: 60, left: -60,
                             child: Container(
                               width: 150, height: 150,
                               decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)),
                             ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: -30, duration: 10.seconds),
                           ),
-                          // Content
+                          // Logo & Text
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const SizedBox(height: 20),
-                                // Logo
+                                const SizedBox(height: 40),
                                 Container(
                                   width: 90, height: 90,
                                   decoration: BoxDecoration(
@@ -161,147 +165,142 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
                       ),
                     ),
 
-                    // ── Form Card ──────────────────────────────────────────
-                    Positioned(
-                      top: 340,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 30, offset: const Offset(0, -10)),
+                    // Form Card
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 30, offset: const Offset(0, -10)),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text('Welcome back', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.foreground)),
+                            const SizedBox(height: 4),
+                            Text('Sign in to your account', style: GoogleFonts.inter(fontSize: 14, color: AppColors.mutedForeground)),
+                            const SizedBox(height: 32),
+
+                            // Email Field
+                            Text('Email', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.foreground)),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _emailCtrl,
+                              decoration: _inputDecoration(Icons.school_outlined, 'you@university.edu'),
+                              validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Password Field
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Password', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.foreground)),
+                                TextButton(
+                                  onPressed: () {},
+                                  child: Text('Forgot password?', style: GoogleFonts.inter(fontSize: 13, color: AppColors.libPurple, fontWeight: FontWeight.w600)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            TextFormField(
+                              controller: _passwordCtrl,
+                              obscureText: _obscure,
+                              decoration: _inputDecoration(Icons.lock_outline, 'Enter your password').copyWith(
+                                suffixIcon: IconButton(
+                                  icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+                                  onPressed: () => setState(() => _obscure = !_obscure),
+                                ),
+                              ),
+                              validator: (v) => (v == null || v.length < 6) ? 'Minimum 6 characters' : null,
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Login Button
+                            ElevatedButton(
+                              onPressed: auth.isLoading ? null : _submit,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.libPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: auth.isLoading
+                                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : Text('Sign In', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700)),
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(child: Divider(color: AppColors.border)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text('or', style: GoogleFonts.inter(fontSize: 12, color: AppColors.mutedForeground)),
+                                ),
+                                Expanded(child: Divider(color: AppColors.border)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Demo Button
+                            GestureDetector(
+                              onTap: _fillDemo,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.libPurple.withOpacity(0.3), width: 1.5, style: BorderStyle.solid),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.menu_book_outlined, color: AppColors.libPurple, size: 18),
+                                    const SizedBox(width: 10),
+                                    Text('Use Demo Account', style: GoogleFonts.inter(color: AppColors.libPurple, fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                      ),
+                    ),
+
+                    // Footer Section
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Welcome back', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.foreground)),
-                              const SizedBox(height: 4),
-                              Text('Sign in to your account', style: GoogleFonts.inter(fontSize: 14, color: AppColors.mutedForeground)),
-                              const SizedBox(height: 32),
-
-                              // Email Field
-                              Text('Email', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.foreground)),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                controller: _emailCtrl,
-                                decoration: _inputDecoration(Icons.school_outlined, 'you@university.edu'),
-                                validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
-                              ),
-                              const SizedBox(height: 20),
-
-                              // Password Field
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Password', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.foreground)),
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text('Forgot password?', style: GoogleFonts.inter(fontSize: 13, color: AppColors.libPurple, fontWeight: FontWeight.w600)),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              TextFormField(
-                                controller: _passwordCtrl,
-                                obscureText: _obscure,
-                                decoration: _inputDecoration(Icons.lock_outline, 'Enter your password').copyWith(
-                                  suffixIcon: IconButton(
-                                    icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
-                                    onPressed: () => setState(() => _obscure = !_obscure),
-                                  ),
-                                ),
-                                validator: (v) => (v == null || v.length < 6) ? 'Minimum 6 characters' : null,
-                              ),
-                              const SizedBox(height: 32),
-
-                              // Login Button
-                              ElevatedButton(
-                                onPressed: auth.isLoading ? null : _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.libPurple,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
-                                child: auth.isLoading
-                                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                    : Text('Sign In', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700)),
-                              ),
-                              
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(child: Divider(color: AppColors.border)),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Text('or', style: GoogleFonts.inter(fontSize: 12, color: AppColors.mutedForeground)),
-                                  ),
-                                  Expanded(child: Divider(color: AppColors.border)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Demo Button (Dashed logic simplified to custom border)
+                              Text("Don't have an account? ", style: GoogleFonts.inter(color: AppColors.mutedForeground)),
                               GestureDetector(
-                                onTap: _fillDemo,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.libPurple.withOpacity(0.3), width: 1.5, style: BorderStyle.solid), // In a real app we'd use a painter for dashes
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.menu_book_outlined, color: AppColors.libPurple, size: 18),
-                                      const SizedBox(width: 10),
-                                      Text('Use Demo Account', style: GoogleFonts.inter(color: AppColors.libPurple, fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                ),
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen())),
+                                child: Text('Register', style: GoogleFonts.inter(color: AppColors.libPurple, fontWeight: FontWeight.w700)),
                               ),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 40),
+                          Text(
+                            'By signing in, you agree to our Terms of Service & Privacy Policy',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(fontSize: 10, color: AppColors.mutedForeground.withOpacity(0.7)),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-
-                // ── Footer Section ────────────────────────────────────────
-                Container(
-                  padding: const EdgeInsets.fromLTRB(24, 480, 24, 40), // Large top padding to push footer below card
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Don't have an account? ", style: GoogleFonts.inter(color: AppColors.mutedForeground)),
-                          GestureDetector(
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen())),
-                            child: Text('Register', style: GoogleFonts.inter(color: AppColors.libPurple, fontWeight: FontWeight.w700)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-                      Text(
-                        'By signing in, you agree to our Terms of Service & Privacy Policy',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 10, color: AppColors.mutedForeground.withOpacity(0.7)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
