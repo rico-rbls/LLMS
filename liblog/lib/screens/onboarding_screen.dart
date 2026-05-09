@@ -93,8 +93,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _role = savedData['role'] ?? 'student';
       _fullNameCtrl.text = savedData['fullName'] ?? '';
       _uniIdCtrl.text = savedData['universityId'] ?? '';
-      _selectedProgram = savedData['program'];
-      _selectedYear = savedData['yearLevel'];
+      
+      final savedProg = savedData['program'];
+      _selectedProgram = _programs.contains(savedProg) ? savedProg : null;
+      
+      final savedYear = savedData['yearLevel'];
+      _selectedYear = _years.contains(savedYear) ? savedYear : null;
+      
       _emailCtrl.text = savedData['email'] ?? '';
       _step = savedStep;
       // We don't restore password for security
