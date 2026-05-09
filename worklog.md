@@ -121,3 +121,23 @@ This document tracks the progressive implementation phases of the LibLog mobile 
   - Details: Rebuilt `resource_detail_screen.dart` using `SliverAppBar` with a collapsing `FlexibleSpaceBar` cover effect. Implemented a 3-column metadata grid and a sticky bottom action bar with dynamic "Borrow/Reserve" logic.
   - Refinement: Eliminated mascot assets as per strict user constraint, ensuring a clean academic aesthetic.
 - **Stage Summary**: Search and Detail flows are now pixel-perfect. The detail screen features high-fidelity sliver animations, and search performance is optimized with debouncing and reusable components.
+
+---
+
+### Phase 9: Login Screen Visual Overhaul
+- **Time Date**: 2026-05-09
+- **Task ID**: UI-LOGIN-01
+- **Agent**: Antigravity (Gemini)
+- **Task**: Refactor the Login screen to match the prototype screenshot, implementing the overlapping card layout and living gradient header.
+- **Prompt(s)**:
+  - *"Analyze the uploaded login page screenshot, BRANDING.md, and FEATURES.md. Create a new Standard Operating Procedure (SOP) in directives/ui_login_implementation.md..."*
+- **Work Log**: 
+  - Directives: Created `directives/ui_login_implementation.md` mapping the prototype's high-impact header and form card structure.
+  - UI Implementation: Completely refactored `login_screen.dart`.
+    - Implemented a 380px "living gradient" header with parallax decorative circles.
+    - Built the overlapping white form card with a 40px top radius and soft elevation.
+    - Customized `TextFormField` decorations to include 12px rounding and `libPurple` focus states.
+    - Styled the "Use Demo Account" button with a branded border and icon.
+    - Constrained the entire layout to a 430px max-width container for platform consistency.
+  - Typography: Swapped all text to `GoogleFonts.inter` with weights matching the design specs.
+- **Stage Summary**: The Login screen is now a high-fidelity match to the design prototype, featuring complex stack-based layout overlaps and animated brand elements.
