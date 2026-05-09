@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../config/colors.dart';
 import '../providers/auth_provider.dart';
+import '../providers/resource_provider.dart';
+import 'resource_detail_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -29,10 +31,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ];
 
   static const _recommended = [
-    {'title': 'Clean Code',           'author': 'R. Martin',    'available': true},
-    {'title': 'Deep Learning',        'author': 'Goodfellow',   'available': false},
-    {'title': 'Design Patterns',      'author': 'GoF',          'available': true},
-    {'title': 'The Pragmatic Programmer', 'author': 'Hunt',     'available': true},
+    {'id': '1', 'title': 'Clean Code',           'author': 'R. Martin',    'available': true},
+    {'id': '2', 'title': 'Deep Learning',        'author': 'Goodfellow',   'available': false},
+    {'id': '1', 'title': 'Design Patterns',      'author': 'GoF',          'available': true},
+    {'id': '1', 'title': 'The Pragmatic Programmer', 'author': 'Hunt',     'available': true},
   ];
 
   static const _trending = [
@@ -372,8 +374,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (_, i) {
                 final book = _recommended[i];
-                return Container(
-                  width: 110,
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(selectedResourceIdProvider.notifier).state = book['id'] as String;
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourceDetailScreen()));
+                  },
+                  child: Container(
+                    width: 110,
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
@@ -437,7 +444,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                ).animate().fadeIn(
+                )).animate().fadeIn(
                     duration: 300.ms, delay: Duration(milliseconds: 260 + i * 60));
               },
             ),

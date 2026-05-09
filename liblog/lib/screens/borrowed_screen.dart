@@ -54,9 +54,10 @@ class _BorrowedScreenState extends ConsumerState<BorrowedScreen> {
       child: Scaffold(
         body: Stack(
           children: [
-            Column(
-              children: [
-                // Header & Tabs
+            Positioned.fill(
+              child: Column(
+                children: [
+                  // Header & Tabs
                 Container(
                   color: Theme.of(context).cardColor,
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -109,6 +110,7 @@ class _BorrowedScreenState extends ConsumerState<BorrowedScreen> {
                   ),
                 ),
               ],
+            ),
             ),
 
             // Success Overlay

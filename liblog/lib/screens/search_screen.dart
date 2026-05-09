@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../config/colors.dart';
+import '../providers/resource_provider.dart';
+import 'resource_detail_screen.dart';
 
 // ── Providers ────────────────────────────────────────────────────────────────
 
@@ -303,14 +305,14 @@ class _ResultsList extends StatelessWidget {
 
   // Stub data — replace with real API call via resourcesProvider
   static const _stub = [
-    {'title': 'Introduction to Algorithms', 'author': 'Cormen et al.', 'category': 'book', 'available': true},
-    {'title': 'Clean Code', 'author': 'Robert C. Martin', 'category': 'book', 'available': true},
-    {'title': 'Deep Learning', 'author': 'Goodfellow et al.', 'category': 'book', 'available': false},
-    {'title': 'Design Patterns', 'author': 'Gang of Four', 'category': 'book', 'available': true},
-    {'title': 'Database System Concepts', 'author': 'Silberschatz et al.', 'category': 'book', 'available': true},
-    {'title': 'ML: A Probabilistic Perspective', 'author': 'Kevin Murphy', 'category': 'research', 'available': true},
-    {'title': 'NeurIPS 2025 Proceedings', 'author': 'Various', 'category': 'research', 'available': false},
-    {'title': 'National Geographic Mar 2026', 'author': 'Nat Geo Society', 'category': 'magazine', 'available': true},
+    {'id': '1', 'title': 'Introduction to Algorithms', 'author': 'Cormen et al.', 'category': 'book', 'available': true},
+    {'id': '1', 'title': 'Clean Code', 'author': 'Robert C. Martin', 'category': 'book', 'available': true},
+    {'id': '2', 'title': 'Deep Learning', 'author': 'Goodfellow et al.', 'category': 'book', 'available': false},
+    {'id': '1', 'title': 'Design Patterns', 'author': 'Gang of Four', 'category': 'book', 'available': true},
+    {'id': '1', 'title': 'Database System Concepts', 'author': 'Silberschatz et al.', 'category': 'book', 'available': true},
+    {'id': '1', 'title': 'ML: A Probabilistic Perspective', 'author': 'Kevin Murphy', 'category': 'research', 'available': true},
+    {'id': '2', 'title': 'NeurIPS 2025 Proceedings', 'author': 'Various', 'category': 'research', 'available': false},
+    {'id': '1', 'title': 'National Geographic Mar 2026', 'author': 'Nat Geo Society', 'category': 'magazine', 'available': true},
   ];
 
   @override
@@ -351,7 +353,15 @@ class _ResultsList extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             itemCount: filtered.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) => _ResourceCard(resource: filtered[i]),
+            itemBuilder: (_, i) => Consumer(
+              builder: (context, ref, _) => GestureDetector(
+                onTap: () {
+                  ref.read(selectedResourceIdProvider.notifier).state = filtered[i]['id'] as String;
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourceDetailScreen()));
+                },
+                child: _ResourceCard(resource: filtered[i]),
+              ),
+            ),
           ),
         ),
       ],
